@@ -37,6 +37,14 @@ class Tree
     rebuild(node, parent, kids, drift)
   end
 
+  def depth(node = root)
+    return 0 if node.nil?
+
+    left = depth(node.left)
+    right = depth(node.right)
+    [left, right].max + 1
+  end
+
   private
 
   def build_tree(array)
