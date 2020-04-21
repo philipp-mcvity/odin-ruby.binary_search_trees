@@ -3,11 +3,11 @@
 
 # provides traversal methods for binary trees
 module Traversal
-  def level_order
-    node = root
+  def level_order(start = root)
+    node = review(start)
     visited = []
     queue = [nil]
-    until queue.empty?
+    until node.nil?
       block_given? ? yield(node) : visited << node.data
       queue = (queue << node.left << node.right).reject(&:nil?)
       node = queue.shift
@@ -16,7 +16,8 @@ module Traversal
   end
 
   %w[pre in post].each do |prefix|
-    define_method "#{prefix}order" do |node = root, visited = [], &block|
+    define_method "#{prefix}order" do |start = root, visited = [], &block|
+      node = review(start)
       visit(node, visited, &block) if prefix == 'pre'
       send "#{prefix}order", node.left, visited, &block if node.left
       visit(node, visited, &block) if prefix == 'in'
@@ -28,5 +29,9 @@ module Traversal
 
   def visit(node, visited)
     block_given? ? yield(node) : visited << node.data
+  end
+
+  def review(node)
+    node.is_a?(Node) ? node : find(node)
   end
 end
