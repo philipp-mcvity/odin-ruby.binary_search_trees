@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require_relative 'node.rb'
-require_relative 'traversal.rb'
+require_relative 'traverse.rb'
 
 # represents the full binary search tree-objects
 class Tree
