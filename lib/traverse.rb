@@ -17,12 +17,13 @@ module Traversal
 
   %w[pre in post].each do |prefix|
     define_method "#{prefix}order" do |start = root, visited = [], &block|
-      node = review(start)
-      visit(node, visited, &block) if prefix == 'pre'
-      send "#{prefix}order", node.left, visited, &block if node.left
-      visit(node, visited, &block) if prefix == 'in'
-      send "#{prefix}order", node.right, visited, &block if node.right
-      visit(node, visited, &block) if prefix == 'post'
+      if (node = review(start))
+        visit(node, visited, &block) if prefix == 'pre'
+        send "#{prefix}order", node.left, visited, &block if node.left
+        visit(node, visited, &block) if prefix == 'in'
+        send "#{prefix}order", node.right, visited, &block if node.right
+        visit(node, visited, &block) if prefix == 'post'
+      end
       block.nil? ? visited : nil
     end
   end

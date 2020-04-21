@@ -18,8 +18,6 @@ class Tree
     self
   end
 
-  def delete(value); end
-
   def find(value)
     node = root
     until node.nil?
@@ -27,6 +25,16 @@ class Tree
 
       node = (value < node.data ? node.left : node.right)
     end
+  end
+
+  def delete(value)
+    return unless (node = find(value))
+
+    parent = parent(node)
+    drift = (parent.left == node ? 'left' : 'right') unless parent.nil?
+    kids = level_order(node)[1..-1].map { |n| find(n) }.each { |n| orphan(n) }
+
+    rebuild(node, parent, kids, drift)
   end
 
   private
@@ -48,5 +56,34 @@ class Tree
       other = move
     end
     node < other ? other.left = node : other.right = node
+  end
+
+  def parent(node)
+    return nil if node == root
+
+    parent = root
+    until parent.nil?
+      return parent if [parent.left, parent.right].include?(node)
+
+      parent = (node.data < parent.data ? parent.left : parent.right)
+    end
+  end
+
+  def rebuild(node, parent, kids, drift)
+    case kids.length
+    when 0
+      node == root ? @root = nil : parent.send(drift + '=', nil)
+    when 1
+      node == root ? @root = kids.first : parent.send(drift + '=', kids.first)
+    else
+      parent.nil? ? @root = kids.shift : parent.send(drift + '=', nil)
+      kids.each { |n| line_up(n, parent ||= root) }
+    end
+    self
+  end
+
+  def orphan(node)
+    node.left = nil
+    node.right = nil
   end
 end
