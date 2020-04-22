@@ -32,9 +32,9 @@ class Tree
 
     parent = parent(node)
     drift = (parent.left == node ? 'left' : 'right') unless parent.nil?
-    kids = level_order(node)[1..-1].map { |n| find(n) }.each { |n| orphan(n) }
-
+    kids = [node.left, node.right].reject(&:nil?)
     rebuild(node, parent, kids, drift)
+    self
   end
 
   def depth(node = root)
@@ -43,6 +43,18 @@ class Tree
     left = depth(node.left)
     right = depth(node.right)
     [left, right].max + 1
+  end
+
+  def bst?(node = root)
+    should_be_sorted = inorder(node)
+    should_be_sorted == should_be_sorted.uniq.sort
+  end
+
+  def balanced?(node = root)
+    return true if depth(node) == 1 || node.nil?
+    return false if (depth(node.left) - depth(node.right)).abs > 1
+
+    balanced?(node.left) && balanced?(node.right)
   end
 
   private
@@ -78,20 +90,7 @@ class Tree
   end
 
   def rebuild(node, parent, kids, drift)
-    case kids.length
-    when 0
-      node == root ? @root = nil : parent.send(drift + '=', nil)
-    when 1
-      node == root ? @root = kids.first : parent.send(drift + '=', kids.first)
-    else
-      parent.nil? ? @root = kids.shift : parent.send(drift + '=', nil)
-      kids.each { |n| line_up(n, parent ||= root) }
-    end
-    self
-  end
-
-  def orphan(node)
-    node.left = nil
-    node.right = nil
+    node == root ? @root = kids.first : parent.send(drift + '=', kids.first)
+    line_up(kids.last) if kids.size == 2
   end
 end
