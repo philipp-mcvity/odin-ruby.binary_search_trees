@@ -7,7 +7,7 @@ _Since I misinterpreted one thing at first, originally_
 Tree.new
 ```
 _did create a **BST**, but **not a balanced** one.
-That will take the first element of the **unsorted** array which is passed to the method and lines up every following element up, one by one.
+It will take the first element of the **unsorted** array which is passed to the method and lines up every following element one by one.
 I eventually decided to keep it that way, this is practice, and since calling_
 ```ruby
 Tree.new.rebalance!
