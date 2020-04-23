@@ -38,11 +38,8 @@ class Tree
   end
 
   def depth(node = root)
-    return 0 if node.nil?
-
-    left = depth(node.left)
-    right = depth(node.right)
-    [left, right].max + 1
+    max_edges = dig(node) - 1
+    max_edges.negative? ? nil : max_edges
   end
 
   def bst?(node = root)
@@ -52,9 +49,28 @@ class Tree
 
   def balanced?(node = root)
     return true if depth(node) == 1 || node.nil?
-    return false if (depth(node.left) - depth(node.right)).abs > 1
+
+    depth_left = depth(node.left) || 0
+    depth_right = depth(node.right) || 0
+    return false if (depth_left - depth_right).abs > 1
 
     balanced?(node.left) && balanced?(node.right)
+  end
+
+  def rebalance!
+    @root = balance(nodes_in_order)
+    self
+  end
+
+  def balance(nodes_ary)
+    return nil if nodes_ary.empty?
+
+    mid = nodes_ary.length / 2
+    root = nodes_ary[mid]
+
+    root.left = mid.zero? ? nil : balance(nodes_ary[0..mid - 1])
+    root.right = balance(nodes_ary[mid + 1..-1])
+    root
   end
 
   private
@@ -89,8 +105,25 @@ class Tree
     end
   end
 
+  def dig(node)
+    return 0 if node.nil?
+
+    [dig(node.left), dig(node.right)].max + 1
+  end
+
   def rebuild(node, parent, kids, drift)
     node == root ? @root = kids.first : parent.send(drift + '=', kids.first)
     line_up(kids.last) if kids.size == 2
+  end
+
+  def nodes_in_order
+    inorder_nodes = []
+    inorder { |node| inorder_nodes << node }
+    inorder_nodes.each { |node| orphan(node) }
+  end
+
+  def orphan(node)
+    node.left = nil
+    node.right = nil
   end
 end
